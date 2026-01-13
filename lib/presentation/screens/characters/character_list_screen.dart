@@ -17,29 +17,14 @@ class CharacterListScreen extends StatelessWidget {
   }
 }
 
-class _CharacterListView extends StatefulWidget {
+class _CharacterListView extends StatelessWidget {
   const _CharacterListView();
 
-  @override
-  State<_CharacterListView> createState() => _CharacterListViewState();
-}
+  void _onScrollNotification(BuildContext context, ScrollNotification notification) {
+    if (notification is! ScrollEndNotification) return;
 
-
-class _CharacterListViewState extends State<_CharacterListView> {
-  final _scrollController = ScrollController();
-
-  @override
-  void initState() {
-    super.initState();
-    _scrollController.addListener(_onScroll);
-  }
-
-  void _onScroll() {
-    if (!_scrollController.hasClients) return;
-
-    final thresholdReached =
-        _scrollController.position.pixels >=
-            _scrollController.position.maxScrollExtent * 0.9;
+    final metrics = notification.metrics;
+    final thresholdReached = metrics.pixels >= metrics.maxScrollExtent * 0.9;
 
     if (!thresholdReached) return;
 
@@ -56,14 +41,7 @@ class _CharacterListViewState extends State<_CharacterListView> {
     );
   }
 
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _showFilterDialog(CharactersState state) async {
+  Future<void> _showFilterDialog(BuildContext context, CharactersState state) async {
     final (name, status, species, type, gender) = state.maybeMap(
       loaded: (s) => (s.name, s.status, s.species, s.type, s.gender),
       orElse: () => (null, null, null, null, null),
@@ -80,7 +58,7 @@ class _CharacterListViewState extends State<_CharacterListView> {
       ),
     );
 
-    if (result != null && mounted) {
+    if (result != null && context.mounted) {
       context.read<CharactersBloc>().add(
             CharactersEvent.updateFilters(
               name: result['name'],
@@ -110,7 +88,7 @@ class _CharacterListViewState extends State<_CharacterListView> {
                     orElse: () => null,
                   ),
                 ),
-                onPressed: () => _showFilterDialog(state),
+                onPressed: () => _showFilterDialog(context, state),
               ),
             ],
           ),
@@ -129,7 +107,7 @@ class _CharacterListViewState extends State<_CharacterListView> {
                   if (activeFilters.isEmpty) return const SizedBox.shrink();
 
                   return Padding(
-                    padding:  EdgeInsets.symmetric(horizontal: 16.0.sp),
+                    padding: EdgeInsets.symmetric(horizontal: 16.0.sp),
                     child: Row(
                       children: [
                         const Text('Filters active: ', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
@@ -175,26 +153,31 @@ class _CharacterListViewState extends State<_CharacterListView> {
                       onRefresh: () async {
                         context.read<CharactersBloc>().add(const CharactersEvent.refresh());
                       },
-                      child: ListView.separated(
-                        controller: _scrollController,
-                        padding: EdgeInsets.all(16.sp),
-                        itemCount: hasReachedMax ? characters.length : characters.length + 1,
-                        separatorBuilder: (context, index) =>  SizedBox(height: 12.sp),
-                        itemBuilder: (context, index) {
-                          if (index >= characters.length) {
-                            return  Center(child: Padding(padding: EdgeInsets.all(8.0.sp), child: CircularProgressIndicator()));
-                          }
-                          final character = characters[index];
-                          return CharacterCard(
-                            character: character,
-                            heroTag: 'list_${character.id}',
-                            onFavoriteToggle: () {
-                              context.read<CharactersBloc>().add(
-                                    CharactersEvent.toggleFavorite(character.id),
-                                  );
-                            },
-                          );
+                      child: NotificationListener<ScrollNotification>(
+                        onNotification: (notification) {
+                          _onScrollNotification(context, notification);
+                          return false;
                         },
+                        child: ListView.separated(
+                          padding: EdgeInsets.all(16.sp),
+                          itemCount: hasReachedMax ? characters.length : characters.length + 1,
+                          separatorBuilder: (context, index) => SizedBox(height: 12.sp),
+                          itemBuilder: (context, index) {
+                            if (index >= characters.length) {
+                              return Center(child: Padding(padding: EdgeInsets.all(8.0.sp), child: CircularProgressIndicator()));
+                            }
+                            final character = characters[index];
+                            return CharacterCard(
+                              character: character,
+                              heroTag: 'list_${character.id}',
+                              onFavoriteToggle: () {
+                                context.read<CharactersBloc>().add(
+                                      CharactersEvent.toggleFavorite(character.id),
+                                    );
+                              },
+                            );
+                          },
+                        ),
                       ),
                     );
                   },

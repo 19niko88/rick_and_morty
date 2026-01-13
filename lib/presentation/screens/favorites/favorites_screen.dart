@@ -20,22 +20,8 @@ class FavoritesScreen extends StatelessWidget {
   }
 }
 
-class _FavoritesView extends StatefulWidget {
+class _FavoritesView extends StatelessWidget {
   const _FavoritesView();
-
-  @override
-  State<_FavoritesView> createState() => _FavoritesViewState();
-}
-
-class _FavoritesViewState extends State<_FavoritesView> {
-
-  FavoriteSortEnum _sortBy = FavoriteSortEnum.name;
-
-  @override
-  void initState() {
-    super.initState();
-    context.read<FavoritesBloc>().add(const FavoritesEvent.fetch());
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,23 +30,34 @@ class _FavoritesViewState extends State<_FavoritesView> {
         title: const Text('Favorites'),
         centerTitle: true,
         actions: [
-          PopupMenuButton<FavoriteSortEnum>(
-            icon: const Icon(Icons.sort),
-            onSelected: (sort) {
-              setState(() {
-                _sortBy = sort;
-              });
+          BlocBuilder<FavoritesBloc, FavoritesState>(
+            buildWhen: (previous, current) => current.maybeMap(
+              loaded: (_) => true,
+              orElse: () => false,
+            ),
+            builder: (context, state) {
+              final sortBy = state.maybeMap(
+                loaded: (s) => s.sortBy,
+                orElse: () => FavoriteSortEnum.name,
+              );
+              return PopupMenuButton<FavoriteSortEnum>(
+                icon: const Icon(Icons.sort),
+                initialValue: sortBy,
+                onSelected: (sort) {
+                  context.read<FavoritesBloc>().add(FavoritesEvent.changeSort(sort));
+                },
+                itemBuilder: (context) => [
+                  const PopupMenuItem(
+                    value: FavoriteSortEnum.name,
+                    child: Text('Sort by Name'),
+                  ),
+                  const PopupMenuItem(
+                    value: FavoriteSortEnum.status,
+                    child: Text('Sort by Status'),
+                  ),
+                ],
+              );
             },
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: FavoriteSortEnum.name,
-                child: Text('Sort by Name'),
-              ),
-              const PopupMenuItem(
-                value: FavoriteSortEnum.status,
-                child: Text('Sort by Status'),
-              ),
-            ],
           ),
         ],
       ),
@@ -69,19 +66,17 @@ class _FavoritesViewState extends State<_FavoritesView> {
           return state.when(
             initial: () => const Center(child: CircularProgressIndicator()),
             loading: () => const Center(child: CircularProgressIndicator()),
-            loaded: (characters) {
+            loaded: (characters, sortBy) {
               if (characters.isEmpty) {
                 return const Center(child: Text('No favorites yet'));
               }
 
-              final sortedCharacters = _sortCharacters(characters);
-
               return ListView.separated(
-                padding:  EdgeInsets.all(16.sp),
-                itemCount: sortedCharacters.length,
-                separatorBuilder: (context, index) =>  SizedBox(height: 12.sp),
+                padding: EdgeInsets.all(16.sp),
+                itemCount: characters.length,
+                separatorBuilder: (context, index) => SizedBox(height: 12.sp),
                 itemBuilder: (context, index) {
-                  final character = sortedCharacters[index];
+                  final character = characters[index];
                   return CharacterCard(
                     character: character,
                     heroTag: 'fav_${character.id}',
@@ -99,15 +94,5 @@ class _FavoritesViewState extends State<_FavoritesView> {
         },
       ),
     );
-  }
-
-  List<Character> _sortCharacters(List<Character> characters) {
-    final List<Character> sortedList = List.from(characters);
-    if (_sortBy == FavoriteSortEnum.name) {
-      sortedList.sort((a, b) => a.name.compareTo(b.name));
-    } else {
-      sortedList.sort((a, b) => a.status.compareTo(b.status));
-    }
-    return sortedList;
   }
 }

@@ -1,5 +1,5 @@
 import 'package:hive_flutter/hive_flutter.dart';
-import '../../domain/models/character/character.dart';
+import 'package:rick_and_morty/domain/domain.dart';
 
 class CharacterLocalDataSource {
   static const String charactersBoxName = 'characters_cache';
@@ -25,7 +25,6 @@ class CharacterLocalDataSource {
     return characters;
   }
 
-  /// Recursively casts a Map to Map<String, dynamic> to handle Hive's _Map<dynamic, dynamic>
   Map<String, dynamic> _deepCastMap(Map map) {
     return map.map((key, value) {
       final castedValue = _deepCastValue(value);
