@@ -1,10 +1,6 @@
-import 'package:injectable/injectable.dart';
-import '../../config/locator/service_locator.dart';
-import '../../domain/models/character/character.dart';
-import '../../domain/repository/character_repository.dart';
-import '../local/character_local_data_source.dart';
-import '../remote/rick_and_morty_api.dart';
-import 'package:dio/dio.dart';
+import 'package:rick_and_morty/domain/domain.dart';
+import 'package:rick_and_morty/config/config.dart';
+import 'package:rick_and_morty/data/data.dart';
 
 @LazySingleton(as: CharacterRepository)
 class CharacterRepositoryImpl implements CharacterRepository {
@@ -16,7 +12,7 @@ class CharacterRepositoryImpl implements CharacterRepository {
   @override
   Future<Character> getCharacterById(int id) async {
     try {
-      final character = await getIt<RickAndMortyApi>().characterById(id);
+      final character = await getIt<RickAndMortyRemoteApi>().characterById(id);
       final isFav = await _localDataSource.isFavorite(id);
       return character.copyWith(isFavorite: isFav);
     } catch (e) {
@@ -48,7 +44,7 @@ class CharacterRepositoryImpl implements CharacterRepository {
     String? gender,
   }) async {
     try {
-      final response = await getIt<RickAndMortyApi>().character(
+      final response = await getIt<RickAndMortyRemoteApi>().character(
         page,
         name: name,
         status: status,
@@ -108,7 +104,7 @@ class CharacterRepositoryImpl implements CharacterRepository {
 
     try {
       final idsString = favoriteIds.join(',');
-      final characters = await getIt<RickAndMortyApi>().characterByIds(idsString);
+      final characters = await getIt<RickAndMortyRemoteApi>().characterByIds(idsString);
       return characters.map((e) => e.copyWith(isFavorite: true)).toList();
     } catch (e) {
       final cached = await _localDataSource.getCachedCharacters();

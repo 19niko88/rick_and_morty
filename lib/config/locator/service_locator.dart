@@ -1,7 +1,7 @@
 import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
 import 'package:dio/dio.dart';
-import '../../data/remote/rick_and_morty_api.dart';
+import '../../data/remote/rick_and_morty_remote_api.dart';
 import '../../data/local/character_local_data_source.dart';
 import '../router/app_router.dart';
 import 'service_locator.config.dart';
@@ -17,7 +17,7 @@ abstract class RegisterModule {
   AppRouter get appRouter => AppRouter();
 
   @lazySingleton
-  RickAndMortyApi getRickAndMortyApi(Dio dio) => RickAndMortyApi(dio);
+  RickAndMortyRemoteApi getRickAndMortyApi(Dio dio) => RickAndMortyRemoteApi(dio);
 
   @lazySingleton
   CharacterLocalDataSource get characterLocalDataSource => CharacterLocalDataSource();

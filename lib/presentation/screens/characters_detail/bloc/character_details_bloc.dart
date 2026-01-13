@@ -1,9 +1,6 @@
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:injectable/injectable.dart';
-import '../../../config/locator/service_locator.dart';
-import '../../../domain/models/character/character.dart';
-import '../../../domain/repository/character_repository.dart';
+import 'package:rick_and_morty/config/config.dart';
+import 'package:rick_and_morty/domain/domain.dart';
 
 part 'character_details_event.dart';
 part 'character_details_state.dart';

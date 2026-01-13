@@ -1,0 +1,1 @@
+export 'rick_and_morty_remote_api.dart';
