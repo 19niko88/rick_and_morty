@@ -1,4 +1,3 @@
-import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:rick_and_morty/config/config.dart';
 import 'package:rick_and_morty/domain/domain.dart';
 
