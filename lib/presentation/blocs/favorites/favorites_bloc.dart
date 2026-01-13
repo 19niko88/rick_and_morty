@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
@@ -11,14 +12,25 @@ part 'favorites_bloc.freezed.dart';
 @injectable
 class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
   final CharacterRepository _repository;
+  StreamSubscription? _favoritesSubscription;
 
   FavoritesBloc(this._repository) : super(const FavoritesState.initial()) {
+    _favoritesSubscription = _repository.watchFavorites.listen((_) {
+      add(const FavoritesEvent.fetch());
+    });
+
     on<FavoritesEvent>((event, emit) async {
       await event.when(
         fetch: () => _onFetch(emit),
         removeFromFavorites: (characterId) => _onRemove(characterId, emit),
       );
     });
+  }
+
+  @override
+  Future<void> close() {
+    _favoritesSubscription?.cancel();
+    return super.close();
   }
 
   Future<void> _onFetch(Emitter<FavoritesState> emit) async {

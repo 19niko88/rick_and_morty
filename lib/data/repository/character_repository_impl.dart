@@ -65,6 +65,12 @@ class CharacterRepositoryImpl implements CharacterRepository {
     return await _localDataSource.isFavorite(characterId);
   }
 
+  @override
+  Stream<int> get watchFavorites async* {
+    final stream = await _localDataSource.watchFavorites();
+    yield* stream.map((event) => event.key as int);
+  }
+
   Future<List<Character>> _enhanceWithFavorites(List<Character> characters) async {
     final favoriteIds = await _localDataSource.getFavoriteIds();
     return characters.map((c) {

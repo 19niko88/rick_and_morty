@@ -18,11 +18,28 @@ class CharacterLocalDataSource {
     for (final key in box.keys) {
       final dynamic value = box.get(key);
       if (value is Map) {
-        final json = value.cast<String, dynamic>();
+        final json = _deepCastMap(value);
         characters.add(Character.fromJson(json));
       }
     }
     return characters;
+  }
+
+  /// Recursively casts a Map to Map<String, dynamic> to handle Hive's _Map<dynamic, dynamic>
+  Map<String, dynamic> _deepCastMap(Map map) {
+    return map.map((key, value) {
+      final castedValue = _deepCastValue(value);
+      return MapEntry(key.toString(), castedValue);
+    });
+  }
+
+  dynamic _deepCastValue(dynamic value) {
+    if (value is Map) {
+      return _deepCastMap(value);
+    } else if (value is List) {
+      return value.map((e) => _deepCastValue(e)).toList();
+    }
+    return value;
   }
 
   Future<void> toggleFavorite(int characterId) async {
@@ -45,5 +62,10 @@ class CharacterLocalDataSource {
   Future<bool> isFavorite(int characterId) async {
     final box = await Hive.openBox<bool>(favoritesBoxName);
     return box.get(characterId) ?? false;
+  }
+
+  Future<Stream<BoxEvent>> watchFavorites() async {
+    await Hive.openBox<bool>(favoritesBoxName);
+    return Hive.box<bool>(favoritesBoxName).watch();
   }
 }

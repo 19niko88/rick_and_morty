@@ -6,4 +6,5 @@ abstract class CharacterRepository {
   Future<List<Character>> getFavorites();
   Future<void> toggleFavorite(int characterId);
   Future<bool> isFavorite(int characterId);
+  Stream<int> get watchFavorites;
 }

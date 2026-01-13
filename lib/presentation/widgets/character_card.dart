@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../domain/models/character/character.dart';
 
 class CharacterCard extends StatelessWidget {
@@ -22,12 +23,18 @@ class CharacterCard extends StatelessWidget {
           Row(
             children: [
               // Character Image
-              Image.network(
-                character.image,
+              CachedNetworkImage(
+                imageUrl: character.image,
                 width: 120,
                 height: 120,
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => const SizedBox(
+                placeholder: (context, url) => Container(
+                  width: 120,
+                  height: 120,
+                  color: Colors.grey[200],
+                  child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                ),
+                errorWidget: (context, url, error) => const SizedBox(
                   width: 120,
                   height: 120,
                   child: Icon(Icons.person, size: 50),
