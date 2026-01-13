@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../blocs/favorites/favorites_bloc.dart';
 import '../../widgets/character_card.dart';
@@ -6,6 +7,7 @@ import '../../../domain/models/character/character.dart';
 
 enum FavoriteSort { name, status }
 
+@RoutePage()
 class FavoritesScreen extends StatefulWidget {
   const FavoritesScreen({super.key});
 

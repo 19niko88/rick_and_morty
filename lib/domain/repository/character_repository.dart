@@ -2,6 +2,7 @@
 import '../models/character/character.dart';
 
 abstract class CharacterRepository {
+  Future<Character> getCharacterById(int id);
   Future<List<Character>> getCharacters(int page);
   Future<List<Character>> getFavorites();
   Future<void> toggleFavorite(int characterId);

@@ -13,6 +13,23 @@ class CharacterRepositoryImpl implements CharacterRepository {
   CharacterRepositoryImpl(this._api, this._localDataSource);
 
   @override
+  Future<Character> getCharacterById(int id) async {
+    try {
+      final character = await _api.characterById(id);
+      final isFav = await _localDataSource.isFavorite(id);
+      return character.copyWith(isFavorite: isFav);
+    } catch (e) {
+      if (e is DioException) {
+        final cached = await _localDataSource.getCachedCharacters();
+        final character = cached.firstWhere((c) => c.id == id);
+        final isFav = await _localDataSource.isFavorite(id);
+        return character.copyWith(isFavorite: isFav);
+      }
+      rethrow;
+    }
+  }
+
+  @override
   Future<List<Character>> getCharacters(int page) async {
     try {
       final response = await _api.character(page);

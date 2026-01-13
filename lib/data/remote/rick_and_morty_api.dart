@@ -13,6 +13,9 @@ abstract class RickAndMortyApi {
   @GET(EndPoints.character)
   Future<CharacterResponse> character(@Query("page") int page);
 
+  @GET(EndPoints.characterById)
+  Future<Character> characterById(@Path("id") int id);
+
   @GET(EndPoints.characterByIds)
   Future<List<Character>> characterByIds(@Path("ids") String ids);
 }
