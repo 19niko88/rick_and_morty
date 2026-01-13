@@ -1,43 +1,61 @@
 import 'package:flutter/material.dart';
 import 'package:auto_route/auto_route.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../blocs/characters/characters_bloc.dart';
-import '../../widgets/character_card.dart';
-import '../../widgets/character_filter_dialog.dart';
+import 'package:rick_and_morty/config/config.dart';
+import 'package:rick_and_morty/presentation/blocs/characters/characters_bloc.dart';
+import 'package:rick_and_morty/presentation/widgets/widgets.dart';
 
 @RoutePage()
-class CharacterListScreen extends StatefulWidget {
+class CharacterListScreen extends StatelessWidget {
   const CharacterListScreen({super.key});
 
   @override
-  State<CharacterListScreen> createState() => _CharacterListScreenState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => getIt<CharactersBloc>()..add(const CharactersEvent.fetch()),
+      child: const _CharacterListView(),
+    );
+  }
 }
 
-class _CharacterListScreenState extends State<CharacterListScreen> {
+class _CharacterListView extends StatefulWidget {
+  const _CharacterListView();
+
+  @override
+  State<_CharacterListView> createState() => _CharacterListViewState();
+}
+
+
+class _CharacterListViewState extends State<_CharacterListView> {
   final _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
-    context.read<CharactersBloc>().add(const CharactersEvent.fetch());
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent * 0.9) {
-      final state = context.read<CharactersBloc>().state;
-      state.maybeMap(
-        loaded: (s) {
-          if (!s.hasReachedMax) {
-            context.read<CharactersBloc>().add(const CharactersEvent.fetch());
-          }
-        },
-        orElse: () {
-          // If we are not in loaded state (e.g. initial), we don't trigger fetch from scroll
-        },
-      );
-    }
+    if (!_scrollController.hasClients) return;
+
+    final thresholdReached =
+        _scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent * 0.9;
+
+    if (!thresholdReached) return;
+
+    final bloc = context.read<CharactersBloc>();
+    final state = bloc.state;
+
+    state.maybeMap(
+      loaded: (s) {
+        if (!s.hasReachedMax) {
+          bloc.add(const CharactersEvent.fetch());
+        }
+      },
+      orElse: () {},
+    );
   }
+
 
   @override
   void dispose() {

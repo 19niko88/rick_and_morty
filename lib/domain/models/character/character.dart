@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import '../character_location/character_location.dart';
+import 'package:rick_and_morty/domain/domain.dart';
+
 
 part 'character.freezed.dart';
 part 'character.g.dart';

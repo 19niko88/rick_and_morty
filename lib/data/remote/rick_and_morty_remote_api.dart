@@ -1,14 +1,12 @@
-import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
-import '../../config/constants/end_points.dart';
-import '../../domain/models/character/character.dart';
-import '../../domain/models/character_response/character_response.dart';
+import 'package:rick_and_morty/config/config.dart';
+import 'package:rick_and_morty/domain/domain.dart';
 
-part 'rick_and_morty_api.g.dart';
+part 'rick_and_morty_remote_api.g.dart';
 
 @RestApi()
-abstract class RickAndMortyApi {
-  factory RickAndMortyApi(Dio dio) = _RickAndMortyApi;
+abstract class RickAndMortyRemoteApi {
+  factory RickAndMortyRemoteApi(Dio dio) = _RickAndMortyRemoteApi;
 
   @GET(EndPoints.character)
   Future<CharacterResponse> character(

@@ -1,22 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:auto_route/auto_route.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../blocs/favorites/favorites_bloc.dart';
-import '../../widgets/character_card.dart';
-import '../../../domain/models/character/character.dart';
+import 'package:rick_and_morty/config/config.dart';
+import 'package:rick_and_morty/domain/domain.dart';
+import 'package:rick_and_morty/presentation/blocs/favorites/favorites_bloc.dart';
+import 'package:rick_and_morty/presentation/widgets/widgets.dart';
 
-enum FavoriteSort { name, status }
+
 
 @RoutePage()
-class FavoritesScreen extends StatefulWidget {
+class FavoritesScreen extends StatelessWidget {
   const FavoritesScreen({super.key});
 
   @override
-  State<FavoritesScreen> createState() => _FavoritesScreenState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => getIt<FavoritesBloc>()..add(const FavoritesEvent.fetch()),
+      child: const _FavoritesView(),
+    );
+  }
 }
 
-class _FavoritesScreenState extends State<FavoritesScreen> {
-  FavoriteSort _sortBy = FavoriteSort.name;
+class _FavoritesView extends StatefulWidget {
+  const _FavoritesView();
+
+  @override
+  State<_FavoritesView> createState() => _FavoritesViewState();
+}
+
+class _FavoritesViewState extends State<_FavoritesView> {
+
+  FavoriteSortEnum _sortBy = FavoriteSortEnum.name;
 
   @override
   void initState() {
@@ -31,7 +44,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
         title: const Text('Favorites'),
         centerTitle: true,
         actions: [
-          PopupMenuButton<FavoriteSort>(
+          PopupMenuButton<FavoriteSortEnum>(
             icon: const Icon(Icons.sort),
             onSelected: (sort) {
               setState(() {
@@ -40,11 +53,11 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
             },
             itemBuilder: (context) => [
               const PopupMenuItem(
-                value: FavoriteSort.name,
+                value: FavoriteSortEnum.name,
                 child: Text('Sort by Name'),
               ),
               const PopupMenuItem(
-                value: FavoriteSort.status,
+                value: FavoriteSortEnum.status,
                 child: Text('Sort by Status'),
               ),
             ],
@@ -90,7 +103,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
 
   List<Character> _sortCharacters(List<Character> characters) {
     final List<Character> sortedList = List.from(characters);
-    if (_sortBy == FavoriteSort.name) {
+    if (_sortBy == FavoriteSortEnum.name) {
       sortedList.sort((a, b) => a.name.compareTo(b.name));
     } else {
       sortedList.sort((a, b) => a.status.compareTo(b.status));

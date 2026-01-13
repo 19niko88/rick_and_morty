@@ -26,6 +26,8 @@ dependencies:
   hive_flutter: ^1.1.0
   path_provider: ^2.1.5
   cached_network_image: ^3.4.1
+  awesome_extensions: ^2.0.26
+  flutter_screenutil: ^5.9.3
 
 dev_dependencies:
   flutter_test:
