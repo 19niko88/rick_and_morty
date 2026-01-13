@@ -8,11 +8,8 @@ import '../interceptors/interceptors.dart';
 abstract class DioClient {
   @lazySingleton
   Dio dio() => Dio(BaseOptions(
-
     baseUrl: APIBase.url,
     headers: {"Content-Type": "application/json"},
   ))
     ..interceptors.addAll([ApiLoggingInterceptor()]);
-
-
 }

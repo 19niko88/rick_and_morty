@@ -5,6 +5,7 @@ part 'character_location.g.dart';
 
 @freezed
  abstract class CharacterLocation with _$CharacterLocation {
+  @JsonSerializable(explicitToJson: true)
   const factory CharacterLocation({
     required String name,
     required String url,

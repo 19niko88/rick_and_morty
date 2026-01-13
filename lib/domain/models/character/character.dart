@@ -7,6 +7,7 @@ part 'character.g.dart';
 
 @freezed
 abstract class Character with _$Character {
+  @JsonSerializable(explicitToJson: true)
   const factory Character({
     required int id,
     required String name,
@@ -20,6 +21,7 @@ abstract class Character with _$Character {
     required List<String> episode,
     required String url,
     required DateTime created,
+    @Default(false) bool isFavorite,
   }) = _Character;
 
   factory Character.fromJson(Map<String, dynamic> json) =>
