@@ -9,10 +9,12 @@ import '../../../domain/models/character/character.dart';
 @RoutePage()
 class CharacterDetailsScreen extends StatelessWidget {
   final int id;
+  final String? heroTag;
 
   const CharacterDetailsScreen({
     super.key,
     required this.id,
+    this.heroTag,
   });
 
   @override
@@ -27,8 +29,31 @@ class CharacterDetailsScreen extends StatelessWidget {
             return state.when(
               initial: () => const Center(child: CircularProgressIndicator()),
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (message) => Center(child: Text('Error: $message')),
-              loaded: (character) => _CharacterDetailsBody(character: character),
+              error: (message) => Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.cloud_off, size: 64, color: Colors.grey),
+                    const SizedBox(height: 16),
+                    Text(
+                      message.contains('offline') 
+                          ? 'Data not available offline' 
+                          : 'Loading error: $message',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(fontSize: 16, color: Colors.black54),
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton(
+                      onPressed: () => context.read<CharacterDetailsBloc>().add(CharacterDetailsEvent.fetch(id)),
+                      child: const Text('Retry'),
+                    ),
+                  ],
+                ),
+              ),
+              loaded: (character) => _CharacterDetailsBody(
+                character: character,
+                heroTag: heroTag,
+              ),
             );
           },
         ),
@@ -39,8 +64,12 @@ class CharacterDetailsScreen extends StatelessWidget {
 
 class _CharacterDetailsBody extends StatelessWidget {
   final Character character;
+  final String? heroTag;
 
-  const _CharacterDetailsBody({required this.character});
+  const _CharacterDetailsBody({
+    required this.character,
+    this.heroTag,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -59,10 +88,18 @@ class _CharacterDetailsBody extends StatelessWidget {
               children: [
                 // Header Image
                 Hero(
-                  tag: 'character_image_${character.id}',
+                  tag: heroTag ?? 'character_image_${character.id}',
                   child: CachedNetworkImage(
                     imageUrl: character.image,
                     fit: BoxFit.cover,
+                    placeholder: (context, url) => Container(
+                      color: Colors.grey[100],
+                      child: const Center(child: CircularProgressIndicator()),
+                    ),
+                    errorWidget: (context, url, error) => Container(
+                      color: Colors.grey[200],
+                      child: const Icon(Icons.person, size: 100, color: Colors.grey),
+                    ),
                   ),
                 ),
                 // Light Gradient Overlay

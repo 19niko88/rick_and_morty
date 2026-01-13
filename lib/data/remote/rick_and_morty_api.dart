@@ -8,10 +8,17 @@ part 'rick_and_morty_api.g.dart';
 
 @RestApi()
 abstract class RickAndMortyApi {
-  factory RickAndMortyApi(Dio dio, {String baseUrl}) = _RickAndMortyApi;
+  factory RickAndMortyApi(Dio dio) = _RickAndMortyApi;
 
   @GET(EndPoints.character)
-  Future<CharacterResponse> character(@Query("page") int page);
+  Future<CharacterResponse> character(
+    @Query("page") int page, {
+    @Query("name") String? name,
+    @Query("status") String? status,
+    @Query("species") String? species,
+    @Query("type") String? type,
+    @Query("gender") String? gender,
+  });
 
   @GET(EndPoints.characterById)
   Future<Character> characterById(@Path("id") int id);

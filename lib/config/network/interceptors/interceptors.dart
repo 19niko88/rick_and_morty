@@ -19,9 +19,16 @@ class ApiLoggingInterceptor extends Interceptor {
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
-    debugPrint(
-      'ERROR[${err.response?.statusCode}] => PATH: ${err.requestOptions.path} => MESSAGE: ${err.message} => DATA: ${err.response?.data}',
-    );
+    if (err.type == DioExceptionType.connectionError ||
+        err.type == DioExceptionType.sendTimeout ||
+        err.type == DioExceptionType.receiveTimeout ||
+        err.message?.contains('Failed host lookup') == true) {
+      debugPrint('NETWORK[OFFLINE] => PATH: ${err.requestOptions.path}');
+    } else {
+      debugPrint(
+        'ERROR[${err.response?.statusCode}] => PATH: ${err.requestOptions.path} => MESSAGE: ${err.message} => DATA: ${err.response?.data}',
+      );
+    }
     return super.onError(err, handler);
   }
 }

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
+import '../../../config/locator/service_locator.dart';
 import '../../../domain/models/character/character.dart';
 import '../../../domain/repository/character_repository.dart';
 
@@ -11,11 +12,10 @@ part 'favorites_bloc.freezed.dart';
 
 @injectable
 class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
-  final CharacterRepository _repository;
   StreamSubscription? _favoritesSubscription;
 
-  FavoritesBloc(this._repository) : super(const FavoritesState.initial()) {
-    _favoritesSubscription = _repository.watchFavorites.listen((_) {
+  FavoritesBloc() : super(const FavoritesState.initial()) {
+    _favoritesSubscription = getIt<CharacterRepository>().watchFavorites.listen((_) {
       add(const FavoritesEvent.fetch());
     });
 
@@ -36,7 +36,7 @@ class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
   Future<void> _onFetch(Emitter<FavoritesState> emit) async {
     emit(const FavoritesState.loading());
     try {
-      final characters = await _repository.getFavorites();
+      final characters = await getIt<CharacterRepository>().getFavorites();
       emit(FavoritesState.loaded(characters: characters));
     } catch (e) {
       emit(FavoritesState.error(message: e.toString()));
@@ -44,7 +44,7 @@ class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
   }
 
   Future<void> _onRemove(int characterId, Emitter<FavoritesState> emit) async {
-    await _repository.toggleFavorite(characterId);
+    await getIt<CharacterRepository>().toggleFavorite(characterId);
     
     final currentState = state;
     if (currentState is _Loaded) {

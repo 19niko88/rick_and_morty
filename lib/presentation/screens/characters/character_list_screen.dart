@@ -3,7 +3,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../blocs/characters/characters_bloc.dart';
 import '../../widgets/character_card.dart';
-import '../../../config/locator/service_locator.dart';
+import '../../widgets/character_filter_dialog.dart';
 
 @RoutePage()
 class CharacterListScreen extends StatefulWidget {
@@ -20,11 +20,22 @@ class _CharacterListScreenState extends State<CharacterListScreen> {
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
+    context.read<CharactersBloc>().add(const CharactersEvent.fetch());
   }
 
   void _onScroll() {
     if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent * 0.9) {
-      context.read<CharactersBloc>().add(const CharactersEvent.fetch());
+      final state = context.read<CharactersBloc>().state;
+      state.maybeMap(
+        loaded: (s) {
+          if (!s.hasReachedMax) {
+            context.read<CharactersBloc>().add(const CharactersEvent.fetch());
+          }
+        },
+        orElse: () {
+          // If we are not in loaded state (e.g. initial), we don't trigger fetch from scroll
+        },
+      );
     }
   }
 
@@ -34,65 +45,169 @@ class _CharacterListScreenState extends State<CharacterListScreen> {
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Characters'),
-        centerTitle: true,
+  Future<void> _showFilterDialog(CharactersState state) async {
+    final (name, status, species, type, gender) = state.maybeMap(
+      loaded: (s) => (s.name, s.status, s.species, s.type, s.gender),
+      orElse: () => (null, null, null, null, null),
+    );
+
+    final result = await showDialog<Map<String, String?>>(
+      context: context,
+      builder: (context) => CharacterFilterDialog(
+        initialName: name,
+        initialStatus: status,
+        initialSpecies: species,
+        initialType: type,
+        initialGender: gender,
       ),
-      body: BlocBuilder<CharactersBloc, CharactersState>(
-        builder: (context, state) {
-          return state.when(
-            initial: () {
-              context.read<CharactersBloc>().add(const CharactersEvent.fetch());
-              return const Center(child: CircularProgressIndicator());
-            },
-            loading: () => const Center(child: CircularProgressIndicator()),
-            loaded: (characters) {
-              if (characters.isEmpty) {
-                return const Center(child: Text('No characters found'));
-              }
-              return RefreshIndicator(
-                onRefresh: () async {
-                  context.read<CharactersBloc>().add(const CharactersEvent.refresh());
-                },
-                child: ListView.separated(
-                  controller: _scrollController,
-                  padding: const EdgeInsets.all(16),
-                  itemCount: characters.length,
-                  separatorBuilder: (context, index) => const SizedBox(height: 12),
-                  itemBuilder: (context, index) {
-                    final character = characters[index];
-                    return CharacterCard(
-                      character: character,
-                      onFavoriteToggle: () {
-                        context.read<CharactersBloc>().add(
-                              CharactersEvent.toggleFavorite(character.id),
-                            );
-                      },
-                    );
-                  },
-                ),
-              );
-            },
-            error: (message) => Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('Error: $message'),
-                  ElevatedButton(
-                    onPressed: () {
-                      context.read<CharactersBloc>().add(const CharactersEvent.refresh());
-                    },
-                    child: const Text('Retry'),
-                  ),
-                ],
-              ),
+    );
+
+    if (result != null && mounted) {
+      context.read<CharactersBloc>().add(
+            CharactersEvent.updateFilters(
+              name: result['name'],
+              status: result['status'],
+              species: result['species'],
+              type: result['type'],
+              gender: result['gender'],
             ),
           );
-        },
-      ),
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<CharactersBloc, CharactersState>(
+      builder: (context, state) {
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Characters'),
+            centerTitle: true,
+            actions: [
+              IconButton(
+                icon: Icon(
+                  Icons.filter_list,
+                  color: state.maybeMap(
+                    loaded: (s) => (s.name != null || s.status != null || s.species != null || s.type != null || s.gender != null) ? Colors.blue : null,
+                    orElse: () => null,
+                  ),
+                ),
+                onPressed: () => _showFilterDialog(state),
+              ),
+            ],
+          ),
+          body: Column(
+            children: [
+              state.maybeMap(
+                loaded: (s) {
+                  final activeFilters = [
+                    if (s.name != null) 'Name: ${s.name}',
+                    if (s.status != null) 'Status: ${s.status}',
+                    if (s.species != null) 'Species: ${s.species}',
+                    if (s.gender != null) 'Gender: ${s.gender}',
+                    if (s.type != null) 'Type: ${s.type}',
+                  ];
+
+                  if (activeFilters.isEmpty) return const SizedBox.shrink();
+
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Row(
+                      children: [
+                        const Text('Filters active: ', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                        Expanded(
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Wrap(
+                              spacing: 4,
+                              children: activeFilters.map((f) => _buildFilterChip(f)).toList(),
+                            ),
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () => context.read<CharactersBloc>().add(const CharactersEvent.clearFilters()),
+                          child: const Text('Clear', style: TextStyle(fontSize: 12)),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+                orElse: () => const SizedBox.shrink(),
+              ),
+              Expanded(
+                child: state.when(
+                  initial: () => const Center(child: CircularProgressIndicator()),
+                  loading: () => const Center(child: CircularProgressIndicator()),
+                  loaded: (characters, hasReachedMax, name, status, species, type, gender) {
+                    if (characters.isEmpty) {
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text('No characters found for these filters'),
+                            TextButton(
+                              onPressed: () => context.read<CharactersBloc>().add(const CharactersEvent.clearFilters()),
+                              child: const Text('Clear Filters'),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+                    return RefreshIndicator(
+                      onRefresh: () async {
+                        context.read<CharactersBloc>().add(const CharactersEvent.refresh());
+                      },
+                      child: ListView.separated(
+                        controller: _scrollController,
+                        padding: const EdgeInsets.all(16),
+                        itemCount: hasReachedMax ? characters.length : characters.length + 1,
+                        separatorBuilder: (context, index) => const SizedBox(height: 12),
+                        itemBuilder: (context, index) {
+                          if (index >= characters.length) {
+                            return const Center(child: Padding(padding: EdgeInsets.all(8.0), child: CircularProgressIndicator()));
+                          }
+                          final character = characters[index];
+                          return CharacterCard(
+                            character: character,
+                            heroTag: 'list_${character.id}',
+                            onFavoriteToggle: () {
+                              context.read<CharactersBloc>().add(
+                                    CharactersEvent.toggleFavorite(character.id),
+                                  );
+                            },
+                          );
+                        },
+                      ),
+                    );
+                  },
+                  error: (message) => Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text('Error: $message'),
+                        ElevatedButton(
+                          onPressed: () {
+                            context.read<CharactersBloc>().add(const CharactersEvent.refresh());
+                          },
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildFilterChip(String label) {
+    return Chip(
+      label: Text(label, style: const TextStyle(fontSize: 10)),
+      padding: EdgeInsets.zero,
+      visualDensity: VisualDensity.compact,
     );
   }
 }
