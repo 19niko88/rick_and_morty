@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:auto_route/auto_route.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:rick_and_morty/config/config.dart';
-import 'package:rick_and_morty/presentation/blocs/characters/characters_bloc.dart';
+import 'package:rick_and_morty/presentation/screens/characters/bloc/characters_bloc.dart';
 import 'package:rick_and_morty/presentation/widgets/widgets.dart';
 
 @RoutePage()
@@ -129,7 +129,7 @@ class _CharacterListViewState extends State<_CharacterListView> {
                   if (activeFilters.isEmpty) return const SizedBox.shrink();
 
                   return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    padding:  EdgeInsets.symmetric(horizontal: 16.0.sp),
                     child: Row(
                       children: [
                         const Text('Filters active: ', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
@@ -177,12 +177,12 @@ class _CharacterListViewState extends State<_CharacterListView> {
                       },
                       child: ListView.separated(
                         controller: _scrollController,
-                        padding: const EdgeInsets.all(16),
+                        padding: EdgeInsets.all(16.sp),
                         itemCount: hasReachedMax ? characters.length : characters.length + 1,
-                        separatorBuilder: (context, index) => const SizedBox(height: 12),
+                        separatorBuilder: (context, index) =>  SizedBox(height: 12.sp),
                         itemBuilder: (context, index) {
                           if (index >= characters.length) {
-                            return const Center(child: Padding(padding: EdgeInsets.all(8.0), child: CircularProgressIndicator()));
+                            return  Center(child: Padding(padding: EdgeInsets.all(8.0.sp), child: CircularProgressIndicator()));
                           }
                           final character = characters[index];
                           return CharacterCard(

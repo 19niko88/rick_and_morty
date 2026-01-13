@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:auto_route/auto_route.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:rick_and_morty/config/config.dart';
 import 'package:rick_and_morty/domain/domain.dart';
-import 'package:rick_and_morty/presentation/blocs/favorites/favorites_bloc.dart';
+import 'package:rick_and_morty/presentation/screens/favorites/bloc/favorites_bloc.dart';
 import 'package:rick_and_morty/presentation/widgets/widgets.dart';
 
 
@@ -77,9 +77,9 @@ class _FavoritesViewState extends State<_FavoritesView> {
               final sortedCharacters = _sortCharacters(characters);
 
               return ListView.separated(
-                padding: const EdgeInsets.all(16),
+                padding:  EdgeInsets.all(16.sp),
                 itemCount: sortedCharacters.length,
-                separatorBuilder: (context, index) => const SizedBox(height: 12),
+                separatorBuilder: (context, index) =>  SizedBox(height: 12.sp),
                 itemBuilder: (context, index) {
                   final character = sortedCharacters[index];
                   return CharacterCard(

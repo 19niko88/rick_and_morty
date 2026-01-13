@@ -1,26 +1,22 @@
-import 'package:auto_route/annotations.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import '../../../config/locator/service_locator.dart';
-import '../../blocs/character_details/character_details_bloc.dart';
-import '../../../domain/models/character/character.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:rick_and_morty/config/config.dart';
+import 'package:rick_and_morty/domain/domain.dart';
+import 'bloc/character_details_bloc.dart';
 
 @RoutePage()
 class CharacterDetailsScreen extends StatelessWidget {
   final int id;
   final String? heroTag;
 
-  const CharacterDetailsScreen({
-    super.key,
-    required this.id,
-    this.heroTag,
-  });
+  const CharacterDetailsScreen({super.key, required this.id, this.heroTag});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => getIt<CharacterDetailsBloc>()..add(CharacterDetailsEvent.fetch(id)),
+      create: (context) =>
+          getIt<CharacterDetailsBloc>()..add(CharacterDetailsEvent.fetch(id)),
       child: Scaffold(
         extendBodyBehindAppBar: true,
         backgroundColor: Colors.white,
@@ -36,24 +32,27 @@ class CharacterDetailsScreen extends StatelessWidget {
                     const Icon(Icons.cloud_off, size: 64, color: Colors.grey),
                     const SizedBox(height: 16),
                     Text(
-                      message.contains('offline') 
-                          ? 'Data not available offline' 
+                      message.contains('offline')
+                          ? 'Data not available offline'
                           : 'Loading error: $message',
                       textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 16, color: Colors.black54),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: Colors.black54,
+                      ),
                     ),
                     const SizedBox(height: 24),
                     ElevatedButton(
-                      onPressed: () => context.read<CharacterDetailsBloc>().add(CharacterDetailsEvent.fetch(id)),
+                      onPressed: () => context.read<CharacterDetailsBloc>().add(
+                        CharacterDetailsEvent.fetch(id),
+                      ),
                       child: const Text('Retry'),
                     ),
                   ],
                 ),
               ),
-              loaded: (character) => _CharacterDetailsBody(
-                character: character,
-                heroTag: heroTag,
-              ),
+              loaded: (character) =>
+                  _CharacterDetailsBody(character: character, heroTag: heroTag),
             );
           },
         ),
@@ -66,18 +65,14 @@ class _CharacterDetailsBody extends StatelessWidget {
   final Character character;
   final String? heroTag;
 
-  const _CharacterDetailsBody({
-    required this.character,
-    this.heroTag,
-  });
+  const _CharacterDetailsBody({required this.character, this.heroTag});
 
   @override
   Widget build(BuildContext context) {
     return CustomScrollView(
       slivers: [
-        // Header with Light Gradient
         SliverAppBar(
-          expandedHeight: 450,
+          expandedHeight: 450.sp,
           pinned: true,
           backgroundColor: Colors.white,
           elevation: 0,
@@ -98,7 +93,11 @@ class _CharacterDetailsBody extends StatelessWidget {
                     ),
                     errorWidget: (context, url, error) => Container(
                       color: Colors.grey[200],
-                      child: const Icon(Icons.person, size: 100, color: Colors.grey),
+                      child: const Icon(
+                        Icons.person,
+                        size: 100,
+                        color: Colors.grey,
+                      ),
                     ),
                   ),
                 ),
@@ -109,7 +108,7 @@ class _CharacterDetailsBody extends StatelessWidget {
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        Colors.black26, // Top shadow for back button visibility
+                        Colors.black26,
                         Colors.transparent,
                         Colors.white70,
                         Colors.white,
@@ -118,11 +117,10 @@ class _CharacterDetailsBody extends StatelessWidget {
                     ),
                   ),
                 ),
-                // Title and basic info on top of gradient
                 Positioned(
-                  bottom: 20,
-                  left: 20,
-                  right: 20,
+                  bottom: 20.sp,
+                  left: 20.sp,
+                  right: 20.sp,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -134,7 +132,7 @@ class _CharacterDetailsBody extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      SizedBox(height: 4.sp),
                       Text(
                         '${character.species} • ${character.gender}',
                         style: TextStyle(
@@ -152,7 +150,7 @@ class _CharacterDetailsBody extends StatelessWidget {
         ),
         // Details Content
         SliverPadding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+          padding: EdgeInsets.symmetric(horizontal: 20.sp, vertical: 24.sp),
           sliver: SliverList(
             delegate: SliverChildListDelegate([
               _buildSectionTitle('Status & Species'),
@@ -161,15 +159,19 @@ class _CharacterDetailsBody extends StatelessWidget {
                 spacing: 12,
                 runSpacing: 12,
                 children: [
-                  _buildLightChip(character.status, _getStatusColor(character.status)),
+                  _buildLightChip(
+                    character.status,
+                    _getStatusColor(character.status),
+                  ),
                   _buildLightChip(character.species, Colors.blueGrey),
                   _buildLightChip(character.gender, Colors.indigo),
-                  if (character.type.isNotEmpty) _buildLightChip(character.type, Colors.teal),
+                  if (character.type.isNotEmpty)
+                    _buildLightChip(character.type, Colors.teal),
                 ],
               ),
-              const SizedBox(height: 32),
+              SizedBox(height: 32.sp),
               _buildSectionTitle('About'),
-              const SizedBox(height: 12),
+              SizedBox(height: 12.sp),
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -183,18 +185,30 @@ class _CharacterDetailsBody extends StatelessWidget {
                   'Appeared in ${character.episode.length} episodes.',
                   style: TextStyle(
                     fontSize: 16,
-                    color: Colors.black.withOpacity(0.7),
+                    color: Colors.black.withValues(alpha: 0.7),
                     height: 1.5,
                   ),
                 ),
               ),
-              const SizedBox(height: 32),
+               SizedBox(height: 32.sp),
               _buildSectionTitle('Information Details'),
-              const SizedBox(height: 16),
-              _buildLightInfoTile(Icons.public, 'Origin', character.origin.name),
-              _buildLightInfoTile(Icons.location_on, 'Last Location', character.location.name),
-              _buildLightInfoTile(Icons.history, 'First Created', character.created.toLocal().toString().split(' ')[0]),
-              const SizedBox(height: 60),
+               SizedBox(height: 16.sp),
+              _buildLightInfoTile(
+                Icons.public,
+                'Origin',
+                character.origin.name,
+              ),
+              _buildLightInfoTile(
+                Icons.location_on,
+                'Last Location',
+                character.location.name,
+              ),
+              _buildLightInfoTile(
+                Icons.history,
+                'First Created',
+                character.created.toLocal().toString().split(' ')[0],
+              ),
+               SizedBox(height: 60.sp),
             ]),
           ),
         ),
@@ -215,11 +229,11 @@ class _CharacterDetailsBody extends StatelessWidget {
 
   Widget _buildLightChip(String label, Color color) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: EdgeInsets.symmetric(horizontal: 16.sp, vertical: 8.sp),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Text(
         label,
@@ -230,18 +244,18 @@ class _CharacterDetailsBody extends StatelessWidget {
 
   Widget _buildLightInfoTile(IconData icon, String label, String value) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16.0),
+      padding: EdgeInsets.only(bottom: 16.0.sp),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: EdgeInsets.all(8.sp),
             decoration: BoxDecoration(
               color: Colors.blueGrey[50],
               shape: BoxShape.circle,
             ),
             child: Icon(icon, color: Colors.blueGrey, size: 20),
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: 16.sp),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -259,7 +273,7 @@ class _CharacterDetailsBody extends StatelessWidget {
                     color: Colors.black87,
                   ),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: 4.sp),
                 Divider(color: Colors.grey[100]),
               ],
             ),

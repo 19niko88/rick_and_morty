@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:auto_route/auto_route.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import '../../domain/models/character/character.dart';
-import '../../../config/router/app_router.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:rick_and_morty/config/config.dart';
+import 'package:rick_and_morty/domain/domain.dart';
 
 class CharacterCard extends StatelessWidget {
   final Character character;
@@ -21,7 +21,7 @@ class CharacterCard extends StatelessWidget {
     final effectiveHeroTag = heroTag ?? 'character_image_${character.id}';
     return Card(
       elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () => context.router.push(CharacterDetailsRoute(
@@ -32,32 +32,30 @@ class CharacterCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                // Character Image
                 Hero(
                   tag: effectiveHeroTag,
                   child: CachedNetworkImage(
                     imageUrl: character.image,
-                    width: 120,
-                    height: 120,
+                    width: 120.sp,
+                    height: 120.sp,
                     fit: BoxFit.cover,
                     placeholder: (context, url) => Container(
-                      width: 120,
-                      height: 120,
+                      width: 120.sp,
+                      height: 120.sp,
                       color: Colors.grey[200],
                       child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
                     ),
-                    errorWidget: (context, url, error) => const SizedBox(
-                      width: 120,
-                      height: 120,
+                    errorWidget: (context, url, error) =>  SizedBox(
+                      width: 120.sp,
+                      height: 120.sp,
                       child: Icon(Icons.person, size: 50),
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
-                // Character Info
+                 SizedBox(width: 12.sp),
                 Expanded(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+                    padding:  EdgeInsets.symmetric(vertical: 8.0.sp, horizontal: 4.0.sp),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -71,13 +69,13 @@ class CharacterCard extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 4),
+                         SizedBox(height: 4.sp),
                         _buildInfoRow(
                           Icons.circle,
                           '${character.status} - ${character.species}',
                           _getStatusColor(character.status),
                         ),
-                        const SizedBox(height: 4),
+                         SizedBox(height: 4.sp),
                         _buildInfoRow(
                           Icons.location_on,
                           character.location.name,
@@ -91,8 +89,8 @@ class CharacterCard extends StatelessWidget {
             ),
             // Favorite Star Button
             Positioned(
-              top: 4,
-              right: 4,
+              top: 4.sp,
+              right: 4.sp,
               child: IconButton(
                 icon: Icon(
                   character.isFavorite ? Icons.star : Icons.star_border,
@@ -111,7 +109,7 @@ class CharacterCard extends StatelessWidget {
     return Row(
       children: [
         Icon(icon, size: 12, color: statusColor),
-        const SizedBox(width: 4),
+         SizedBox(width: 4.sp),
         Expanded(
           child: Text(
             text,

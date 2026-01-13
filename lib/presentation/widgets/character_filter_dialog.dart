@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class CharacterFilterDialog extends StatefulWidget {
   final String? initialName;
@@ -65,7 +66,7 @@ class _CharacterFilterDialogState extends State<CharacterFilterDialog> {
                 prefixIcon: Icon(Icons.person_search),
               ),
             ),
-            const SizedBox(height: 16),
+             SizedBox(height: 16.sp),
             const Text('Status', style: TextStyle(fontWeight: FontWeight.bold)),
             Wrap(
               spacing: 8,
@@ -81,7 +82,7 @@ class _CharacterFilterDialogState extends State<CharacterFilterDialog> {
                 );
               }).toList(),
             ),
-            const SizedBox(height: 16),
+             SizedBox(height: 16.sp),
             TextField(
               controller: _speciesController,
               decoration: const InputDecoration(
@@ -90,7 +91,7 @@ class _CharacterFilterDialogState extends State<CharacterFilterDialog> {
                 prefixIcon: Icon(Icons.bug_report),
               ),
             ),
-            const SizedBox(height: 16),
+             SizedBox(height: 16.sp),
             const Text('Gender', style: TextStyle(fontWeight: FontWeight.bold)),
             Wrap(
               spacing: 8,
@@ -106,7 +107,7 @@ class _CharacterFilterDialogState extends State<CharacterFilterDialog> {
                 );
               }).toList(),
             ),
-             const SizedBox(height: 16),
+              SizedBox(height: 16.sp),
             TextField(
               controller: _typeController,
               decoration: const InputDecoration(

@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:auto_route/auto_route.dart';
-import '../../../config/router/app_router.dart';
+import 'package:rick_and_morty/config/config.dart';
 
 @RoutePage()
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+class NavigationScreen extends StatelessWidget {
+  const NavigationScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
