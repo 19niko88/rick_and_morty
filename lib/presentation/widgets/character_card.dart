@@ -7,29 +7,34 @@ import '../../../config/router/app_router.dart';
 class CharacterCard extends StatelessWidget {
   final Character character;
   final VoidCallback onFavoriteToggle;
+  final String? heroTag;
 
   const CharacterCard({
     super.key,
     required this.character,
     required this.onFavoriteToggle,
+    this.heroTag,
   });
 
   @override
   Widget build(BuildContext context) {
+    final effectiveHeroTag = heroTag ?? 'character_image_${character.id}';
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: () => context.router.push(CharacterDetailsRoute(id: character.id)),
+        onTap: () => context.router.push(CharacterDetailsRoute(
+          id: character.id,
+          heroTag: effectiveHeroTag,
+        )),
         child: Stack(
           children: [
             Row(
               children: [
                 // Character Image
-                // Character Image
                 Hero(
-                  tag: 'character_image_${character.id}',
+                  tag: effectiveHeroTag,
                   child: CachedNetworkImage(
                     imageUrl: character.image,
                     width: 120,

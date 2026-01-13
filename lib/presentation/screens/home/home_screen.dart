@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:auto_route/auto_route.dart';
-import '../characters/character_list_screen.dart';
-import '../favorites/favorites_screen.dart';
 import '../../../config/router/app_router.dart';
 
 @RoutePage()

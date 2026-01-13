@@ -1,4 +1,5 @@
 import 'package:injectable/injectable.dart';
+import '../../config/locator/service_locator.dart';
 import '../../domain/models/character/character.dart';
 import '../../domain/repository/character_repository.dart';
 import '../local/character_local_data_source.dart';
@@ -7,45 +8,93 @@ import 'package:dio/dio.dart';
 
 @LazySingleton(as: CharacterRepository)
 class CharacterRepositoryImpl implements CharacterRepository {
-  final RickAndMortyApi _api;
+
   final CharacterLocalDataSource _localDataSource;
 
-  CharacterRepositoryImpl(this._api, this._localDataSource);
+  CharacterRepositoryImpl(this._localDataSource);
 
   @override
   Future<Character> getCharacterById(int id) async {
     try {
-      final character = await _api.characterById(id);
+      final character = await getIt<RickAndMortyApi>().characterById(id);
       final isFav = await _localDataSource.isFavorite(id);
       return character.copyWith(isFavorite: isFav);
     } catch (e) {
-      if (e is DioException) {
+      if (e is DioException || e is StateError) {
         final cached = await _localDataSource.getCachedCharacters();
-        final character = cached.firstWhere((c) => c.id == id);
-        final isFav = await _localDataSource.isFavorite(id);
-        return character.copyWith(isFavorite: isFav);
+        final character = cached.cast<Character?>().firstWhere(
+          (c) => c?.id == id,
+          orElse: () => null,
+        );
+        
+        if (character != null) {
+          final isFav = await _localDataSource.isFavorite(id);
+          return character.copyWith(isFavorite: isFav);
+        }
+        
+        throw Exception('Data not available offline');
       }
       rethrow;
     }
   }
 
   @override
-  Future<List<Character>> getCharacters(int page) async {
+  Future<(List<Character>, bool)> getCharacters(
+    int page, {
+    String? name,
+    String? status,
+    String? species,
+    String? type,
+    String? gender,
+  }) async {
     try {
-      final response = await _api.character(page);
+      final response = await getIt<RickAndMortyApi>().character(
+        page,
+        name: name,
+        status: status,
+        species: species,
+        type: type,
+        gender: gender,
+      );
       final characters = response.results;
-      
-      // Cache characters
+      final hasNext = response.info.next != null;
+
       await _localDataSource.cacheCharacters(characters);
-      
-      // Enhance with favorite status
-      return await _enhanceWithFavorites(characters);
+
+      return (await _enhanceWithFavorites(characters), hasNext);
     } catch (e) {
       if (e is DioException) {
-        // Fallback to cache if offline
+        if (e.response?.statusCode == 404) {
+          return (<Character>[], false);
+        }
+
         final cached = await _localDataSource.getCachedCharacters();
         if (cached.isNotEmpty) {
-           return await _enhanceWithFavorites(cached);
+          final filtered = cached.where((c) {
+            bool matches = true;
+            if (name != null && !c.name.toLowerCase().contains(name.toLowerCase())) {
+              matches = false;
+            }
+            if (status != null && c.status.toLowerCase() != status.toLowerCase()) {
+              matches = false;
+            }
+            if (species != null && !c.species.toLowerCase().contains(species.toLowerCase())) {
+              matches = false;
+            }
+            if (type != null && !c.type.toLowerCase().contains(type.toLowerCase())) {
+              matches = false;
+            }
+            if (gender != null && c.gender.toLowerCase() != gender.toLowerCase()) {
+              matches = false;
+            }
+            return matches;
+          }).toList();
+
+          if (page == 1) {
+            return (await _enhanceWithFavorites(filtered), false);
+          } else {
+            return (<Character>[], false);
+          }
         }
       }
       rethrow;
@@ -58,12 +107,10 @@ class CharacterRepositoryImpl implements CharacterRepository {
     if (favoriteIds.isEmpty) return [];
 
     try {
-      // Try to fetch newest data for favorites from API
       final idsString = favoriteIds.join(',');
-      final characters = await _api.characterByIds(idsString);
+      final characters = await getIt<RickAndMortyApi>().characterByIds(idsString);
       return characters.map((e) => e.copyWith(isFavorite: true)).toList();
     } catch (e) {
-      // Fallback to cached characters if offline
       final cached = await _localDataSource.getCachedCharacters();
       return cached
           .where((c) => favoriteIds.contains(c.id))
@@ -88,7 +135,9 @@ class CharacterRepositoryImpl implements CharacterRepository {
     yield* stream.map((event) => event.key as int);
   }
 
-  Future<List<Character>> _enhanceWithFavorites(List<Character> characters) async {
+  Future<List<Character>> _enhanceWithFavorites(
+    List<Character> characters,
+  ) async {
     final favoriteIds = await _localDataSource.getFavoriteIds();
     return characters.map((c) {
       return c.copyWith(isFavorite: favoriteIds.contains(c.id));

@@ -71,6 +71,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                   final character = sortedCharacters[index];
                   return CharacterCard(
                     character: character,
+                    heroTag: 'fav_${character.id}',
                     onFavoriteToggle: () {
                       context.read<FavoritesBloc>().add(
                             FavoritesEvent.removeFromFavorites(character.id),
