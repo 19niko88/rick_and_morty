@@ -1,0 +1,1 @@
+enum FavoriteSortEnum { name, status }
