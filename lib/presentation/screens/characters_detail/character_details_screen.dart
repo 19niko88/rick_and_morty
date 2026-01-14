@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:rick_and_morty/config/config.dart';
 import 'package:rick_and_morty/domain/domain.dart';
+import 'package:rick_and_morty/utils/utils.dart';
 import 'bloc/character_details_bloc.dart';
 
 @RoutePage()
@@ -83,6 +84,17 @@ class _CharacterDetailsBody extends StatelessWidget {
           backgroundColor: colorScheme.surface,
           elevation: 0,
           leading: BackButton(color: colorScheme.onSurface),
+          actions: [
+            BlocBuilder<ConnectivityStatusBloc, ConnectivityStatusState>(
+              builder: (context, connectivityState) {
+                if (connectivityState.isConnected) return const SizedBox.shrink();
+                return const Padding(
+                  padding: EdgeInsets.only(right: 16.0),
+                  child: Icon(Icons.cloud_off, color: Colors.red),
+                );
+              },
+            ),
+          ],
           flexibleSpace: FlexibleSpaceBar(
             background: Stack(
               fit: StackFit.expand,

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:rick_and_morty/config/config.dart';
-import 'package:rick_and_morty/presentation/screens/characters/bloc/characters_bloc.dart';
 import 'package:rick_and_morty/presentation/widgets/widgets.dart';
 import 'package:rick_and_morty/utils/utils.dart';
 import 'package:rick_and_morty/domain/domain.dart';
+import 'bloc/characters_bloc.dart';
+
 
 @RoutePage()
 class CharacterListScreen extends StatelessWidget {
@@ -106,6 +107,15 @@ class _CharacterListView extends StatelessWidget {
             title: const Text('Characters'),
             centerTitle: true,
             actions: [
+              BlocBuilder<ConnectivityStatusBloc, ConnectivityStatusState>(
+                builder: (context, connectivityState) {
+                  if (connectivityState.isConnected) return const SizedBox.shrink();
+                  return const Padding(
+                    padding: EdgeInsets.only(right: 8.0),
+                    child: Icon(Icons.cloud_off, color: Colors.red),
+                  );
+                },
+              ),
               IconButton(
                 icon: Icon(
                   Icons.filter_list,

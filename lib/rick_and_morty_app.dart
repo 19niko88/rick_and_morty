@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:rick_and_morty/utils/theme/bloc/theme_bloc.dart';
+import 'package:rick_and_morty/utils/utils.dart';
 import 'config/config.dart';
 import 'domain/domain.dart';
 
@@ -9,8 +9,15 @@ class RickAndMortyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => getIt<ThemeBloc>()..add(const ThemeEvent.started()),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (_) => getIt<ThemeBloc>()..add(const ThemeEvent.started()),
+        ),
+        BlocProvider(
+          create: (_) => getIt<ConnectivityStatusBloc>()..add(const ConnectivityStatusEvent.started()),
+        ),
+      ],
       child: ScreenUtilInit(
         designSize: const Size(375, 812),
         builder: (context, _) {
