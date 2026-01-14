@@ -1,6 +1,6 @@
 import 'package:rick_and_morty/config/config.dart';
-import '../../../data/local/theme_local_data_source.dart';
 import 'package:rick_and_morty/domain/domain.dart';
+import 'package:rick_and_morty/data/data.dart';
 
 part 'theme_event.dart';
 part 'theme_state.dart';

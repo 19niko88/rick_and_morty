@@ -74,7 +74,6 @@ class CharactersBloc extends Bloc<CharactersEvent, CharactersState> {
       final reachedEnd = !hasNext || newCharacters.isEmpty || newCharacters.length < 20;
       
       final allCharacters = [...oldCharacters, ...newCharacters];
-      // Ensure unique characters by ID
       final Map<int, Character> uniqueMap = {
         for (final c in allCharacters) c.id: c
       };
@@ -211,7 +210,6 @@ class CharactersBloc extends Bloc<CharactersEvent, CharactersState> {
 
   Future<void> _onToggleFavorite(int characterId, Emitter<CharactersState> emit) async {
     await getIt<CharacterRepository>().toggleFavorite(characterId);
-    // UI update will be handled by the stream listener in watchFavorites
   }
 
   Future<void> _onUpdateFavoriteStatus(int characterId, bool isFavorite, Emitter<CharactersState> emit) async {

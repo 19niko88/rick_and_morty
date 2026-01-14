@@ -1,8 +1,6 @@
 import 'dart:async';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
-
-import '../../../config/config.dart';
+import 'package:rick_and_morty/config/config.dart';
+import 'package:rick_and_morty/utils/utils.dart';
 
 part 'connectivity_status_event.dart';
 part 'connectivity_status_state.dart';

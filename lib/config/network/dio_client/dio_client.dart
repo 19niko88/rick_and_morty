@@ -1,8 +1,4 @@
-import 'package:dio/dio.dart';
-import 'package:injectable/injectable.dart';
-
-import '../../constants/constants.dart';
-import '../interceptors/interceptors.dart';
+import 'package:rick_and_morty/config/config.dart';
 
 @module
 abstract class DioClient {

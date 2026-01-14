@@ -110,8 +110,8 @@ class _CharacterListView extends StatelessWidget {
               BlocBuilder<ConnectivityStatusBloc, ConnectivityStatusState>(
                 builder: (context, connectivityState) {
                   if (connectivityState.isConnected) return const SizedBox.shrink();
-                  return const Padding(
-                    padding: EdgeInsets.only(right: 8.0),
+                  return Padding(
+                    padding: EdgeInsets.only(right: 8.0.sp),
                     child: Icon(Icons.cloud_off, color: Colors.red),
                   );
                 },
