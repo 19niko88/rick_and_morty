@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:rick_and_morty/config/config.dart';
-import 'package:rick_and_morty/presentation/screens/characters/bloc/characters_bloc.dart';
 import 'package:rick_and_morty/presentation/widgets/widgets.dart';
+import 'package:rick_and_morty/utils/utils.dart';
+import 'package:rick_and_morty/domain/domain.dart';
+import 'bloc/characters_bloc.dart';
+
 
 @RoutePage()
 class CharacterListScreen extends StatelessWidget {
@@ -77,14 +80,54 @@ class _CharacterListView extends StatelessWidget {
       builder: (context, state) {
         return Scaffold(
           appBar: AppBar(
+            leading: BlocBuilder<ThemeBloc, ThemeState>(
+              builder: (context, themeState) {
+                return PopupMenuButton<AppThemeModeEnum>(
+                  icon: Icon(_getThemeIcon(themeState.mode)),
+                  onSelected: (mode) {
+                    context.read<ThemeBloc>().add(ThemeEvent.changed(mode));
+                  },
+                  itemBuilder: (context) => const [
+                    PopupMenuItem(
+                      value: AppThemeModeEnum.system,
+                      child: Text('System'),
+                    ),
+                    PopupMenuItem(
+                      value: AppThemeModeEnum.light,
+                      child: Text('Light'),
+                    ),
+                    PopupMenuItem(
+                      value: AppThemeModeEnum.dark,
+                      child: Text('Dark'),
+                    ),
+                  ],
+                );
+              },
+            ),
             title: const Text('Characters'),
             centerTitle: true,
             actions: [
+              BlocBuilder<ConnectivityStatusBloc, ConnectivityStatusState>(
+                builder: (context, connectivityState) {
+                  if (connectivityState.isConnected) return const SizedBox.shrink();
+                  return Padding(
+                    padding: EdgeInsets.only(right: 8.0.sp),
+                    child: Icon(Icons.cloud_off, color: Colors.red),
+                  );
+                },
+              ),
               IconButton(
                 icon: Icon(
                   Icons.filter_list,
                   color: state.maybeMap(
-                    loaded: (s) => (s.name != null || s.status != null || s.species != null || s.type != null || s.gender != null) ? Colors.blue : null,
+                    loaded: (s) =>
+                    (s.name != null ||
+                        s.status != null ||
+                        s.species != null ||
+                        s.type != null ||
+                        s.gender != null)
+                        ? Colors.blue
+                        : null,
                     orElse: () => null,
                   ),
                 ),
@@ -210,5 +253,13 @@ class _CharacterListView extends StatelessWidget {
       padding: EdgeInsets.zero,
       visualDensity: VisualDensity.compact,
     );
+  }
+
+  IconData _getThemeIcon(AppThemeModeEnum mode) {
+    return switch (mode) {
+      AppThemeModeEnum.system => Icons.brightness_auto,
+      AppThemeModeEnum.light => Icons.brightness_low,
+      AppThemeModeEnum.dark => Icons.brightness_2,
+    };
   }
 }

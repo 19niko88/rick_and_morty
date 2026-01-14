@@ -1,9 +1,6 @@
 import 'package:get_it/get_it.dart';
-import 'package:injectable/injectable.dart';
-import 'package:dio/dio.dart';
-import '../../data/remote/rick_and_morty_remote_api.dart';
-import '../../data/local/character_local_data_source.dart';
-import '../router/app_router.dart';
+import 'package:rick_and_morty/data/data.dart';
+import 'package:rick_and_morty/config/config.dart';
 import 'service_locator.config.dart';
 
 final getIt = GetIt.instance;

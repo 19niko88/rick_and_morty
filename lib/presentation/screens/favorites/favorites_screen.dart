@@ -4,6 +4,7 @@ import 'package:rick_and_morty/config/config.dart';
 import 'package:rick_and_morty/domain/domain.dart';
 import 'package:rick_and_morty/presentation/screens/favorites/bloc/favorites_bloc.dart';
 import 'package:rick_and_morty/presentation/widgets/widgets.dart';
+import 'package:rick_and_morty/utils/utils.dart';
 
 
 
@@ -30,6 +31,15 @@ class _FavoritesView extends StatelessWidget {
         title: const Text('Favorites'),
         centerTitle: true,
         actions: [
+          BlocBuilder<ConnectivityStatusBloc, ConnectivityStatusState>(
+            builder: (context, connectivityState) {
+              if (connectivityState.isConnected) return const SizedBox.shrink();
+              return const Padding(
+                padding: EdgeInsets.only(right: 8.0),
+                child: Icon(Icons.cloud_off, color: Colors.red),
+              );
+            },
+          ),
           BlocBuilder<FavoritesBloc, FavoritesState>(
             buildWhen: (previous, current) => current.maybeMap(
               loaded: (_) => true,
