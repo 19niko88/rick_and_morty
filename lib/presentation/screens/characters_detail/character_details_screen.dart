@@ -14,12 +14,15 @@ class CharacterDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return BlocProvider(
       create: (context) =>
           getIt<CharacterDetailsBloc>()..add(CharacterDetailsEvent.fetch(id)),
       child: Scaffold(
         extendBodyBehindAppBar: true,
-        backgroundColor: Colors.white,
+        backgroundColor: colorScheme.surface,
         body: BlocBuilder<CharacterDetailsBloc, CharacterDetailsState>(
           builder: (context, state) {
             return state.when(
@@ -29,16 +32,16 @@ class CharacterDetailsScreen extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.cloud_off, size: 64, color: Colors.grey),
+                    Icon(Icons.cloud_off, size: 64, color: colorScheme.outline),
                     const SizedBox(height: 16),
                     Text(
                       message.contains('offline')
                           ? 'Data not available offline'
                           : 'Loading error: $message',
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
-                        color: Colors.black54,
+                        color: colorScheme.onSurfaceVariant,
                       ),
                     ),
                     const SizedBox(height: 24),
@@ -69,14 +72,17 @@ class _CharacterDetailsBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return CustomScrollView(
       slivers: [
         SliverAppBar(
           expandedHeight: 450.sp,
           pinned: true,
-          backgroundColor: Colors.white,
+          backgroundColor: colorScheme.surface,
           elevation: 0,
-          leading: const BackButton(color: Colors.black87),
+          leading: BackButton(color: colorScheme.onSurface),
           flexibleSpace: FlexibleSpaceBar(
             background: Stack(
               fit: StackFit.expand,
@@ -88,32 +94,32 @@ class _CharacterDetailsBody extends StatelessWidget {
                     imageUrl: character.image,
                     fit: BoxFit.cover,
                     placeholder: (context, url) => Container(
-                      color: Colors.grey[100],
+                      color: colorScheme.surfaceContainerHighest,
                       child: const Center(child: CircularProgressIndicator()),
                     ),
                     errorWidget: (context, url, error) => Container(
-                      color: Colors.grey[200],
-                      child: const Icon(
+                      color: colorScheme.surfaceContainerHighest,
+                      child: Icon(
                         Icons.person,
                         size: 100,
-                        color: Colors.grey,
+                        color: colorScheme.outline,
                       ),
                     ),
                   ),
                 ),
-                // Light Gradient Overlay
-                const DecoratedBox(
+                // Gradient Overlay
+                DecoratedBox(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        Colors.black26,
+                        Colors.black.withValues(alpha: 0.3),
                         Colors.transparent,
-                        Colors.white70,
-                        Colors.white,
+                        colorScheme.surface.withValues(alpha: 0.8),
+                        colorScheme.surface,
                       ],
-                      stops: [0.0, 0.4, 0.85, 1.0],
+                      stops: const [0.0, 0.4, 0.85, 1.0],
                     ),
                   ),
                 ),
@@ -126,18 +132,16 @@ class _CharacterDetailsBody extends StatelessWidget {
                     children: [
                       Text(
                         character.name,
-                        style: const TextStyle(
-                          color: Colors.black87,
-                          fontSize: 32,
+                        style: theme.textTheme.headlineLarge?.copyWith(
+                          color: colorScheme.onSurface,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       SizedBox(height: 4.sp),
                       Text(
                         '${character.species} • ${character.gender}',
-                        style: TextStyle(
-                          color: Colors.grey[700],
-                          fontSize: 18,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -153,57 +157,60 @@ class _CharacterDetailsBody extends StatelessWidget {
           padding: EdgeInsets.symmetric(horizontal: 20.sp, vertical: 24.sp),
           sliver: SliverList(
             delegate: SliverChildListDelegate([
-              _buildSectionTitle('Status & Species'),
+              _buildSectionTitle(context, 'Status & Species'),
               const SizedBox(height: 12),
               Wrap(
                 spacing: 12,
                 runSpacing: 12,
                 children: [
                   _buildLightChip(
+                    context,
                     character.status,
                     _getStatusColor(character.status),
                   ),
-                  _buildLightChip(character.species, Colors.blueGrey),
-                  _buildLightChip(character.gender, Colors.indigo),
+                  _buildLightChip(context, character.species, colorScheme.secondary),
+                  _buildLightChip(context, character.gender, colorScheme.tertiary),
                   if (character.type.isNotEmpty)
-                    _buildLightChip(character.type, Colors.teal),
+                    _buildLightChip(context, character.type, colorScheme.primary),
                 ],
               ),
               SizedBox(height: 32.sp),
-              _buildSectionTitle('About'),
+              _buildSectionTitle(context, 'About'),
               SizedBox(height: 12.sp),
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.grey[50], // Very light background
+                  color: colorScheme.surfaceContainerLow,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.grey[200]!),
+                  border: Border.all(color: colorScheme.outlineVariant),
                 ),
                 child: Text(
                   '${character.name} is a ${character.species.toLowerCase()} character. '
                   'The current status is ${character.status.toLowerCase()}. '
                   'Appeared in ${character.episode.length} episodes.',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.black.withValues(alpha: 0.7),
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: colorScheme.onSurface.withValues(alpha: 0.8),
                     height: 1.5,
                   ),
                 ),
               ),
                SizedBox(height: 32.sp),
-              _buildSectionTitle('Information Details'),
+              _buildSectionTitle(context, 'Information Details'),
                SizedBox(height: 16.sp),
               _buildLightInfoTile(
+                context,
                 Icons.public,
                 'Origin',
                 character.origin.name,
               ),
               _buildLightInfoTile(
+                context,
                 Icons.location_on,
                 'Last Location',
                 character.location.name,
               ),
               _buildLightInfoTile(
+                context,
                 Icons.history,
                 'First Created',
                 character.created.toLocal().toString().split(' ')[0],
@@ -216,18 +223,18 @@ class _CharacterDetailsBody extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionTitle(String title) {
+  Widget _buildSectionTitle(BuildContext context, String title) {
+    final theme = Theme.of(context);
     return Text(
       title,
-      style: const TextStyle(
-        fontSize: 20,
+      style: theme.textTheme.titleLarge?.copyWith(
         fontWeight: FontWeight.bold,
-        color: Colors.black87,
+        color: theme.colorScheme.onSurface,
       ),
     );
   }
 
-  Widget _buildLightChip(String label, Color color) {
+  Widget _buildLightChip(BuildContext context, String label, Color color) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16.sp, vertical: 8.sp),
       decoration: BoxDecoration(
@@ -242,7 +249,10 @@ class _CharacterDetailsBody extends StatelessWidget {
     );
   }
 
-  Widget _buildLightInfoTile(IconData icon, String label, String value) {
+  Widget _buildLightInfoTile(BuildContext context, IconData icon, String label, String value) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Padding(
       padding: EdgeInsets.only(bottom: 16.0.sp),
       child: Row(
@@ -250,10 +260,10 @@ class _CharacterDetailsBody extends StatelessWidget {
           Container(
             padding: EdgeInsets.all(8.sp),
             decoration: BoxDecoration(
-              color: Colors.blueGrey[50],
+              color: colorScheme.secondaryContainer,
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, color: Colors.blueGrey, size: 20),
+            child: Icon(icon, color: colorScheme.onSecondaryContainer, size: 20),
           ),
           SizedBox(width: 16.sp),
           Expanded(
@@ -262,19 +272,20 @@ class _CharacterDetailsBody extends StatelessWidget {
               children: [
                 Text(
                   label,
-                  style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   value,
-                  style: const TextStyle(
-                    fontSize: 16,
+                  style: theme.textTheme.bodyLarge?.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: Colors.black87,
+                    color: colorScheme.onSurface,
                   ),
                 ),
                 SizedBox(height: 4.sp),
-                Divider(color: Colors.grey[100]),
+                Divider(color: colorScheme.outlineVariant),
               ],
             ),
           ),

@@ -3,6 +3,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:rick_and_morty/config/config.dart';
 import 'package:rick_and_morty/presentation/screens/characters/bloc/characters_bloc.dart';
 import 'package:rick_and_morty/presentation/widgets/widgets.dart';
+import 'package:rick_and_morty/utils/utils.dart';
+import 'package:rick_and_morty/domain/domain.dart';
 
 @RoutePage()
 class CharacterListScreen extends StatelessWidget {
@@ -77,6 +79,30 @@ class _CharacterListView extends StatelessWidget {
       builder: (context, state) {
         return Scaffold(
           appBar: AppBar(
+            leading: BlocBuilder<ThemeBloc, ThemeState>(
+              builder: (context, themeState) {
+                return PopupMenuButton<AppThemeModeEnum>(
+                  icon: Icon(_getThemeIcon(themeState.mode)),
+                  onSelected: (mode) {
+                    context.read<ThemeBloc>().add(ThemeEvent.changed(mode));
+                  },
+                  itemBuilder: (context) => const [
+                    PopupMenuItem(
+                      value: AppThemeModeEnum.system,
+                      child: Text('System'),
+                    ),
+                    PopupMenuItem(
+                      value: AppThemeModeEnum.light,
+                      child: Text('Light'),
+                    ),
+                    PopupMenuItem(
+                      value: AppThemeModeEnum.dark,
+                      child: Text('Dark'),
+                    ),
+                  ],
+                );
+              },
+            ),
             title: const Text('Characters'),
             centerTitle: true,
             actions: [
@@ -84,7 +110,14 @@ class _CharacterListView extends StatelessWidget {
                 icon: Icon(
                   Icons.filter_list,
                   color: state.maybeMap(
-                    loaded: (s) => (s.name != null || s.status != null || s.species != null || s.type != null || s.gender != null) ? Colors.blue : null,
+                    loaded: (s) =>
+                    (s.name != null ||
+                        s.status != null ||
+                        s.species != null ||
+                        s.type != null ||
+                        s.gender != null)
+                        ? Colors.blue
+                        : null,
                     orElse: () => null,
                   ),
                 ),
@@ -210,5 +243,13 @@ class _CharacterListView extends StatelessWidget {
       padding: EdgeInsets.zero,
       visualDensity: VisualDensity.compact,
     );
+  }
+
+  IconData _getThemeIcon(AppThemeModeEnum mode) {
+    return switch (mode) {
+      AppThemeModeEnum.system => Icons.brightness_auto,
+      AppThemeModeEnum.light => Icons.brightness_low,
+      AppThemeModeEnum.dark => Icons.brightness_2,
+    };
   }
 }
